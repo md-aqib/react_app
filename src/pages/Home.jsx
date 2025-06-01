@@ -152,7 +152,7 @@ const Home = () => {
             <form onSubmit={(e) => handleSubmit(e, editUser.id)}>
               <input name="firstname" placeholder="First Name" value={formData.firstname} onChange={handleChange} required style={inputStyle} />
               <input name="lastname" placeholder="Last Name" value={formData.lastname} onChange={handleChange} required style={inputStyle} />
-              <input name="age" placeholder="Age" type="number" value={formData.age} onChange={handleChange} required style={inputStyle} />
+              <input name="age" placeholder="Age" type="number" value={formData.age} onChange={handleChange} required min="0" style={inputStyle} />
               <select name="gender" value={formData.gender} onChange={handleChange} required style={inputStyle}>
                 <option value="">Select Gender</option>
                 <option value="Male">Male</option>
