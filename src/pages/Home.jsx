@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-const userData = [
+let userData = [
   { id: 1, firstname: "Alice", lastname: "Smith", age: 25, gender: "Female" },
   { id: 2, firstname: "Bob", lastname: "Johnson", age: 30, gender: "Male" },
   { id: 3, firstname: "Charlie", lastname: "Brown", age: 22, gender: "Male" },
@@ -17,8 +17,39 @@ const Home = () => {
   });
   const [ searchTerm, setSearchTerm ] = useState("");
 
+  useEffect(() => {
+    const term = searchTerm.trim().toLowerCase();
+    console.log({term})
+    if (term === "") {
+      setUsers(userData);
+    } else {
+      const filtered = userData.filter(
+        (user) =>
+          user.firstname.toLowerCase().includes(term) ||
+          user.lastname.toLowerCase().includes(term) ||
+          user.gender.toLowerCase().includes(term) ||
+          user.age.toString().includes(term)
+      );
+      setUsers(filtered);
+    }
+  }, [searchTerm]);
+
   const handleChange = e => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleDelete = (id) => {
+    let newUserData = [...users];
+    const filteredData = newUserData.filter(e => e.id != id);
+    userData = filteredData;
+    setUsers(filteredData)
+  };
+
+  const handleEdit = (id) => {
+    let newUserData = [...users];
+    const filteredData = newUserData.filter(e => e.id != id);
+    userData = filteredData;
+    setUsers(filteredData)
   };
 
   const handleSubmit = e => {
@@ -28,10 +59,12 @@ const Home = () => {
       id: users.length + 1,
       age: Number(formData.age),
     };
+    userData = [...users, newUser];
     setUsers([...users, newUser]);
     setFormData({ firstname: "", lastname: "", age: "", gender: "" });
     setShowForm(false);
   };
+
   return (
     <div style={{ padding: 20 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
@@ -44,7 +77,7 @@ const Home = () => {
             type="text"
             placeholder="Search..."
             value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
+            onChange={(e) => setSearchTerm(e.target.value)}
             style={smallSearchInput}
           />
         </div>
@@ -57,16 +90,24 @@ const Home = () => {
                 <th style={thStyle}>Last Name</th>
                 <th style={thStyle}>Age</th>
                 <th style={thStyle}>Gender</th>
+                <th style={thStyle}>Action</th>
             </tr>
             </thead>
             <tbody>
             {users.map(user => (
                 <tr key={user.id}>
-                <td style={tdStyle}>{user.id}</td>
-                <td style={tdStyle}>{user.firstname}</td>
-                <td style={tdStyle}>{user.lastname}</td>
-                <td style={tdStyle}>{user.age}</td>
-                <td style={tdStyle}>{user.gender}</td>
+                  <td style={tdStyle}>{user.id}</td>
+                  <td style={tdStyle}>{user.firstname}</td>
+                  <td style={tdStyle}>{user.lastname}</td>
+                  <td style={tdStyle}>{user.age}</td>
+                  <td style={tdStyle}>{user.gender}</td>
+                  <td style={tdStyle}><button type="button" onClick={() => handleEdit(user.id)} style={{ ...buttonStyle, background: "#888" }}>
+                      Edit
+                    </button>
+                    <button type="button" onClick={() => handleDelete(user.id)} style={{ color: "#FFFFFF", background: "#FF0000" }}>
+                      Delete
+                    </button>
+                  </td>
                 </tr>
             ))}
         </tbody>
