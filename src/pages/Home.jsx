@@ -9,6 +9,10 @@ let userData = [
 const Home = () => {
   const [users, setUsers] = useState(userData);
   const [showForm, setShowForm] = useState(false);
+  const [editUser, setEditUser] = useState({
+    action: false,
+    id: 0
+  });
   const [formData, setFormData] = useState({
     firstname: "",
     lastname: "",
@@ -45,24 +49,53 @@ const Home = () => {
     setUsers(filteredData)
   };
 
-  const handleEdit = (id) => {
-    let newUserData = [...users];
-    const filteredData = newUserData.filter(e => e.id != id);
-    userData = filteredData;
-    setUsers(filteredData)
+  const handleEdit = (user) => {
+    setFormData(user);
+    setEditUser({ action: true, id: user.id });
+    setShowForm(true);
+  };
+
+  const handleCancel = () => {
+    setShowForm(false);
+    setEditUser({ action: false, id: 0 });
+    setFormData({ firstname: "", lastname: "", age: "", gender: "" });
   };
 
   const handleSubmit = e => {
     e.preventDefault();
-    const newUser = {
-      ...formData,
-      id: users.length + 1,
-      age: Number(formData.age),
-    };
-    userData = [...users, newUser];
-    setUsers([...users, newUser]);
-    setFormData({ firstname: "", lastname: "", age: "", gender: "" });
-    setShowForm(false);
+    // Update user
+    if(editUser.action) {
+      let originalData = [...users]
+      const update = originalData.map(ele => {
+        if(ele.id === editUser.id){
+          return {
+            id: ele.id,
+            firstname: formData.firstname,
+            lastname: formData.lastname,
+            age: formData.age,
+            gender: formData.gender
+          }
+        } else {
+          return ele;
+        };
+      });
+      userData = update;
+      setUsers(update);
+      setFormData({ firstname: "", lastname: "", age: "", gender: "" });
+      setShowForm(false);
+      setEditUser({ action: false, id: 0 });
+    } else {
+      // Add new user
+      const newUser = {
+        ...formData,
+        id: users.length + 1,
+        age: Number(formData.age),
+      };
+      userData = [...users, newUser];
+      setUsers([...users, newUser]);
+      setFormData({ firstname: "", lastname: "", age: "", gender: "" });
+      setShowForm(false);
+    }
   };
 
   return (
@@ -101,7 +134,7 @@ const Home = () => {
                   <td style={tdStyle}>{user.lastname}</td>
                   <td style={tdStyle}>{user.age}</td>
                   <td style={tdStyle}>{user.gender}</td>
-                  <td style={tdStyle}><button type="button" onClick={() => handleEdit(user.id)} style={{ ...buttonStyle, background: "#888" }}>
+                  <td style={tdStyle}><button type="button" onClick={() => handleEdit(user)} style={{ ...buttonStyle, background: "#888" }}>
                       Edit
                     </button>
                     <button type="button" onClick={() => handleDelete(user.id)} style={{ color: "#FFFFFF", background: "#FF0000" }}>
@@ -115,8 +148,8 @@ const Home = () => {
       {showForm && (
         <div style={modalStyle}>
           <div style={formBoxStyle}>
-            <h3>Add New User</h3>
-            <form onSubmit={handleSubmit}>
+            <h3>{editUser.action ? "Edit User" : "Add New User"}</h3>
+            <form onSubmit={(e) => handleSubmit(e, editUser.id)}>
               <input name="firstname" placeholder="First Name" value={formData.firstname} onChange={handleChange} required style={inputStyle} />
               <input name="lastname" placeholder="Last Name" value={formData.lastname} onChange={handleChange} required style={inputStyle} />
               <input name="age" placeholder="Age" type="number" value={formData.age} onChange={handleChange} required style={inputStyle} />
@@ -127,7 +160,7 @@ const Home = () => {
               </select>
               <div>
                 <button type="submit" style={buttonStyle}>Submit</button>
-                <button type="button" onClick={() => setShowForm(false)} style={{ ...buttonStyle, background: "#888" }}>
+                <button type="button" onClick={() => handleCancel()} style={{ ...buttonStyle, background: "#888" }}>
                   Cancel
                 </button>
               </div>
